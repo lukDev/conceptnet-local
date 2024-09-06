@@ -2,7 +2,7 @@ import random
 import time
 from typing import Type
 
-from conceptnet_local._a_star import Path, AStar, Concept, SearchRelation, Relation
+from conceptnet_local._a_star import Path, AStar, Concept, SearchRelation, Relation, NoPathFoundError
 from pydantic import BaseModel
 
 
@@ -68,9 +68,13 @@ def get_offshoot_paths(
 
         blocked_a_star = BlockedAStar()
 
-        spur_path = blocked_a_star.compute_path(
-            input_concept=spur_node, output_concept=goal
-        )
+        try:
+            spur_path = blocked_a_star.compute_path(
+                input_concept=spur_node, output_concept=goal
+            )
+        except NoPathFoundError:
+            continue
+
         total_path = root_path + spur_path
         paths.add(_PathWithHash(path=total_path))
 
