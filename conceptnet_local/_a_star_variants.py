@@ -3,10 +3,9 @@ from sqlite3 import Cursor
 from typing import Callable, Type
 
 import numpy as np
+from conceptnet_local._cn_service import get_relatedness
+from conceptnet_local._a_star import Concept, Relation, AStar
 from pydantic import NonNegativeFloat
-
-import _a_star
-import _cn_service
 
 
 # ====================
@@ -15,10 +14,10 @@ import _cn_service
 
 
 def _get_cost_edge_count(
-    source: _a_star.Concept,
-    target: _a_star.Concept,
-    relation: _a_star.Relation,
-    goal: _a_star.Concept,
+    source: Concept,
+    target: Concept,
+    relation: Relation,
+    goal: Concept,
     db_cursor: Cursor | None,
 ) -> float:
     """Compute the edge-count cost of going from the source concept to the target concept (which is always 1)."""
@@ -26,10 +25,10 @@ def _get_cost_edge_count(
 
 
 def _get_cost_edge_weight_natural(
-    source: _a_star.Concept,
-    target: _a_star.Concept,
-    relation: _a_star.Relation,
-    goal: _a_star.Concept,
+    source: Concept,
+    target: Concept,
+    relation: Relation,
+    goal: Concept,
     db_cursor: Cursor | None,
 ) -> float:
     """Compute the natural edge-weight cost of going from the source concept to the target concept (which is the inverse CN edge weight)."""
@@ -39,10 +38,10 @@ def _get_cost_edge_weight_natural(
 
 
 def _get_cost_edge_weight_inverse(
-    source: _a_star.Concept,
-    target: _a_star.Concept,
-    relation: _a_star.Relation,
-    goal: _a_star.Concept,
+    source: Concept,
+    target: Concept,
+    relation: Relation,
+    goal: Concept,
     db_cursor: Cursor | None,
 ) -> float:
     """Compute the inverse edge-weight cost of going from the source concept to the target concept (which is the CN edge weight)."""
@@ -52,17 +51,17 @@ def _get_cost_edge_weight_inverse(
 
 
 def _get_cost_similarity_difference(
-    source: _a_star.Concept,
-    target: _a_star.Concept,
-    relation: _a_star.Relation,
-    goal: _a_star.Concept,
+    source: Concept,
+    target: Concept,
+    relation: Relation,
+    goal: Concept,
     db_cursor: Cursor | None,
 ) -> float:
     """Compute the similarity-difference cost of going from the source concept to the target concept."""
-    similarity_source = _cn_service.get_relatedness(
+    similarity_source = get_relatedness(
         source.id, goal.id, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
-    similarity_target = _cn_service.get_relatedness(
+    similarity_target = get_relatedness(
         target.id, goal.id, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
 
@@ -79,9 +78,9 @@ def _get_cost_similarity_difference(
 # =========================
 
 
-def _get_heuristic_similarity(current: _a_star.Concept, goal: _a_star.Concept, db_cursor: Cursor | None) -> float:
+def _get_heuristic_similarity(current: Concept, goal: Concept, db_cursor: Cursor | None) -> float:
     """Compute the similarity between the given current concept and the goal."""
-    cosine_similarity = _cn_service.get_relatedness(
+    cosine_similarity = get_relatedness(
         current.id, goal.id, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
     return 1 - cosine_similarity  # in [0, 2], 0 being close
@@ -162,7 +161,7 @@ def _get_weighted_values(
 
 def get_a_star_variant(
     cost_weights: CostWeightMap, heuristic_weights: HeuristicWeightMap
-) -> Type[_a_star.AStar]:
+) -> Type[AStar]:
     """
     Get a variant of A* based on the given parameters.
 
@@ -178,13 +177,13 @@ def get_a_star_variant(
     if sum(all_cost_weights) <= 0.0:
         raise ValueError("At least one weight must be > 0.")
 
-    class CustomAStar(_a_star.AStar):
+    class CustomAStar(AStar):
         def get_cost(
             self,
-            source: _a_star.Concept,
-            target: _a_star.Concept,
-            relation: _a_star.Relation,
-            goal: _a_star.Concept,
+            source: Concept,
+            target: Concept,
+            relation: Relation,
+            goal: Concept,
         ) -> float:
             function_arguments = {
                 "source": source,
@@ -199,7 +198,7 @@ def get_a_star_variant(
                 arguments=function_arguments,
             )
 
-        def get_heuristic(self, current: _a_star.Concept, goal: _a_star.Concept) -> float:
+        def get_heuristic(self, current: Concept, goal: Concept) -> float:
             function_arguments = {"current": current, "goal": goal, "db_cursor": self.db_cursor}
             return _get_weighted_values(
                 weight_map=heuristic_weights,

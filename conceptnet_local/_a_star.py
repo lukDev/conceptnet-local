@@ -10,7 +10,7 @@ from typing import Optional
 from pydantic import BaseModel
 from sortedcontainers import SortedList
 
-import _cn_service
+from conceptnet_local._cn_service import setup_sqlite_db, close_sqlite_db, CnDbRelation, get_all_edges
 
 
 class NoPathFoundError(Exception):
@@ -118,7 +118,7 @@ class AStar(ABC):
         """
         start_time = time.time()
 
-        self.db_connection, self.db_cursor = _cn_service.setup_sqlite_db()
+        self.db_connection, self.db_cursor = setup_sqlite_db()
 
         concept_dict = ConceptDict()
         priority_queue = PriorityQueue()
@@ -177,7 +177,7 @@ class AStar(ABC):
         raise NoPathFoundError()
 
     def close_db_connection(self):
-        _cn_service.close_sqlite_db(db_connection=self.db_connection)
+        close_sqlite_db(db_connection=self.db_connection)
         self.db_connection = None
         self.db_cursor = None
 
@@ -214,7 +214,7 @@ class AStar(ABC):
         :param concept:         The concept for which all neighbors should be retrieved.
         :return:                A list containing all neighbors of the given concept, each along with the connecting relation.
         """
-        edges: list[_cn_service.CnDbRelation] = _cn_service.get_all_edges(cn_id=concept.id, db_cursor=self.db_cursor)
+        edges: list[CnDbRelation] = get_all_edges(cn_id=concept.id, db_cursor=self.db_cursor)
 
         all_neighbours: set[SearchRelation] = set()
         for edge in edges:

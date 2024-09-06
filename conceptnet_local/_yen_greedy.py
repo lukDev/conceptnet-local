@@ -2,24 +2,23 @@ import random
 import time
 from typing import Type
 
+from conceptnet_local._a_star import Path, AStar, Concept, SearchRelation, Relation
 from pydantic import BaseModel
-
-import _a_star
 
 
 class _PathWithHash(BaseModel):
-    path: _a_star.Path
+    path: Path
 
     def __hash__(self):
         return hash(tuple(self.path))
 
 
 def get_offshoot_paths(
-    custom_a_star: Type[_a_star.AStar],
-    original_path: _a_star.Path,
+    custom_a_star: Type[AStar],
+    original_path: Path,
     max_paths: int | None = None,
     print_time: bool = False,
-) -> list[_a_star.Path]:
+) -> list[Path]:
     """
     Use a greedy version of Yen's algorithm to compute offshoot paths of the given path.
     An offshoot path will start with the same input concept and end with the same output concept as the original path.
@@ -52,14 +51,14 @@ def get_offshoot_paths(
         spur_node = path_nodes_without_goal[i]
         root_path = original_path[:i]
 
-        blocked_relations: set[_a_star.Relation] = {original_path[i].relation}
+        blocked_relations: set[Relation] = {original_path[i].relation}
         for root_sr in root_path:
             blocked_relations.add(root_sr.relation)
 
         class BlockedAStar(custom_a_star):
             def get_neighbors(
-                self, concept: _a_star.Concept
-            ) -> list[_a_star.SearchRelation]:
+                self, concept: Concept
+            ) -> list[SearchRelation]:
                 all_neighbors = super().get_neighbors(concept=concept)
                 return [
                     neighbor_sr
