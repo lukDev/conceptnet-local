@@ -12,6 +12,16 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "numpy",
+    "pydantic",
+    "sortedcontainers"
+]
+
+[project.optional-dependencies]
+dev = [
+    "black"
+]
 
 [project.urls]
 Homepage = "https://github.com/lukDev/conceptnet-local"
