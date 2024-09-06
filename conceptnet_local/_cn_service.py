@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from functools import wraps
 from sqlite3 import Connection, Cursor
@@ -61,7 +62,15 @@ def get_relatedness(*cn_ids: str, db_cursor: Cursor | None = None) -> float:
 
 def setup_sqlite_db() -> tuple[Connection, Cursor]:
     """Set up the connection to the SQLite database containing the CN data."""
-    db_connection = sqlite3.connect(database="../data/cn.db")
+    cn_db_path = os.getenv("CN_DB_PATH")
+
+    if cn_db_path is None:
+        raise ValueError("CN DB path is not specified in the environment variables")
+
+    if not os.path.isfile(cn_db_path):
+        raise ValueError("CN DB path does not point to a file")
+
+    db_connection = sqlite3.connect(database=cn_db_path)
     db_cursor = db_connection.cursor()
 
     return db_connection, db_cursor
