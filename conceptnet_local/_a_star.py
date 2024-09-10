@@ -266,7 +266,7 @@ def format_path(path: Path) -> str:
         relation_name = sr.relation.rel.replace("/r/", "")
 
         lines.append(
-            f"{sr.source_id} {start_arrow}——{relation_name}—({sr.relation.weight:.1f})——{end_arrow} {sr.target_id}"
+            f"{sr.source_id} {start_arrow}——{relation_name}——{end_arrow} {sr.target_id}"
         )
 
     return "\n".join(lines)
