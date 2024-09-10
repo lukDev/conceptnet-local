@@ -6,7 +6,7 @@ from conceptnet_local._a_star import Path, AStar, Concept, SearchRelation, Relat
 from pydantic import BaseModel
 
 
-class _PathWithHash(BaseModel):
+class PathWithHash(BaseModel):
     path: Path
 
     def __hash__(self):
@@ -38,7 +38,7 @@ def get_offshoot_paths(
     """
     start_time = time.time()
 
-    paths: set[_PathWithHash] = set()
+    paths: set[PathWithHash] = set()
 
     path_nodes_without_goal = [r.source_id for r in original_path]
     goal = original_path[-1].target_id
@@ -76,7 +76,7 @@ def get_offshoot_paths(
             continue
 
         total_path = root_path + spur_path
-        paths.add(_PathWithHash(path=total_path))
+        paths.add(PathWithHash(path=total_path))
 
     if print_time:
         end_time = time.time()

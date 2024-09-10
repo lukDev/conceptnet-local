@@ -10,7 +10,7 @@ from typing import Optional
 from pydantic import BaseModel
 from sortedcontainers import SortedList
 
-from conceptnet_local._cn_service import setup_sqlite_db, close_sqlite_db, CnDbRelation, get_all_edges
+from conceptnet_local._cn_service import setup_sqlite_db, close_sqlite_db, get_all_edges, Relation
 
 
 class NoPathFoundError(Exception):
@@ -36,20 +36,6 @@ class Concept(BaseModel):
 
     def __lt__(self, other: "Concept") -> bool:
         return self.fscore < other.fscore
-
-
-class Relation(BaseModel):
-    id: str
-    start: str
-    end: str
-    rel: str
-    weight: float
-
-    def __eq__(self, other: "Relation"):
-        return self.id == other.id
-
-    def __hash__(self):
-        return hash(self.id)
 
 
 class SearchRelation(BaseModel):
@@ -214,7 +200,7 @@ class AStar(ABC):
         :param concept:         The concept for which all neighbors should be retrieved.
         :return:                A list containing all neighbors of the given concept, each along with the connecting relation.
         """
-        edges: list[CnDbRelation] = get_all_edges(cn_id=concept.id, db_cursor=self.db_cursor)
+        edges: list[Relation] = get_all_edges(cn_id=concept.id, db_cursor=self.db_cursor)
 
         all_neighbours: set[SearchRelation] = set()
         for edge in edges:

@@ -7,12 +7,18 @@ import numpy as np
 from pydantic import BaseModel
 
 
-class CnDbRelation(BaseModel):
+class Relation(BaseModel):
     id: str
     start: str
     end: str
     rel: str
     weight: float
+
+    def __eq__(self, other: "Relation"):
+        return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
 
 
 ##################
@@ -20,7 +26,7 @@ class CnDbRelation(BaseModel):
 ##################
 
 
-def get_all_edges(cn_id: str, db_cursor: Cursor | None = None) -> list[CnDbRelation]:
+def get_all_edges(cn_id: str, db_cursor: Cursor | None = None) -> list[Relation]:
     """
     Retrieve all edges connected to the concept with the given ID.
 
@@ -111,7 +117,7 @@ def with_cn_db():
 
 # TODO: make more flexible, i.e., add filters like in the public ConceptNet API
 @with_cn_db()
-def _db_get_relations(cn_id: str, db_cursor: Cursor) -> list[CnDbRelation]:
+def _db_get_relations(cn_id: str, db_cursor: Cursor) -> list[Relation]:
     """Retrieve all relations (edges) connected to the concept with the given ID."""
     statement = db_cursor.execute(
         "SELECT * FROM relations WHERE (start = ? OR end = ?) AND rel != '/r/ExternalURL'",
@@ -120,7 +126,7 @@ def _db_get_relations(cn_id: str, db_cursor: Cursor) -> list[CnDbRelation]:
     result = statement.fetchall()
 
     relations = [
-        CnDbRelation(id=r[0], start=r[1], end=r[2], rel=r[3], weight=r[4])
+        Relation(id=r[0], start=r[1], end=r[2], rel=r[3], weight=r[4])
         for r in result
     ]
     return relations
