@@ -3,16 +3,8 @@ import sqlite3
 from functools import wraps
 from sqlite3 import Connection, Cursor
 
-import fasttext
 import numpy as np
 from pydantic import BaseModel
-
-_USE_NUMBERBATCH = os.getenv("CN_USE_NUMBERBATCH", "false") == "true"
-
-_FASTTEXT_PATH = os.getenv("CN_FASTTEXT_PATH")
-if _FASTTEXT_PATH is None:
-    raise ValueError("FastText model path is not specified in the environment variables")
-_FASTTEXT_MODEL = fasttext.load_model(_FASTTEXT_PATH)
 
 
 class Relation(BaseModel):
@@ -58,16 +50,10 @@ def get_relatedness(*cn_ids: str, db_cursor: Cursor | None = None) -> float:
             f"relatedness can only be computed between 2 concepts, but {len(cn_ids)} were given"
         )
 
-    use_fasttext = True
-    if _USE_NUMBERBATCH:
-        try:
-            embeddings = [_db_get_embedding(cn_id=cn_id, db_cursor=db_cursor) for cn_id in cn_ids]
-            use_fasttext = False
-        except ValueError:
-            pass
-
-    if use_fasttext:
-        embeddings = [_FASTTEXT_MODEL.get_word_vector(word=_get_concept_from_cn_id(cn_id=cn_id)) for cn_id in cn_ids]
+    try:
+        embeddings = [_db_get_embedding(cn_id=cn_id, db_cursor=db_cursor) for cn_id in cn_ids]
+    except ValueError:
+        return -1
 
     e1, e2 = embeddings
     cosine_similarity = np.dot(e1, e2) / (np.linalg.norm(e1) * np.linalg.norm(e2))
@@ -160,15 +146,3 @@ def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
     embedding_string = result[0]
     embedding = np.fromstring(embedding_string, sep=" ")
     return embedding
-
-
-####################
-# Helper Functions #
-####################
-
-
-def _get_concept_from_cn_id(cn_id: str) -> str:
-    """Extract the concept name from the given CN ID."""
-    concept = cn_id.replace("/c/en/", "")
-    concept = concept.replace("_", " ")
-    return concept
