@@ -1,4 +1,6 @@
-import _setup
+import dotenv
+
+dotenv.load_dotenv()
 
 from ._cn_service import get_all_edges, get_relatedness, get_all_concept_ids, setup_sqlite_db, close_sqlite_db, Relation
 from ._a_star import AStar, Path, format_path, NoPathFoundError, SearchRelation, Concept
