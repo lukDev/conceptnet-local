@@ -4,6 +4,9 @@ ConceptNet and CN Numberbatch with a local DB and API.
 
 ## Version History
 
+### 0.4.0
+- FastText embeddings for arbitrary text
+
 ### 0.3.0
 - retrieval of all concept IDs
 

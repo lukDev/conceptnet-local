@@ -52,8 +52,8 @@ def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None)
     :param db_cursor:   The DB cursor to use in the queries (optional).
     :return:            The relatedness of the given concepts, as a float in [-1, 1].
     """
-    e1 = _FASTTEXT_MODEL.get_sentence_vector(text=_get_concept_from_cn_id(cn_id=cn_id_1))
-    e2 = _FASTTEXT_MODEL.get_sentence_vector(text=_get_concept_from_cn_id(cn_id=cn_id_2))
+    e1 = get_embedding_for_text(text=_get_concept_from_cn_id(cn_id=cn_id_1))
+    e2 = get_embedding_for_text(text=_get_concept_from_cn_id(cn_id=cn_id_2))
 
     # TODO: figure out why using the DB results in much slower A* runs
     # try:
@@ -77,9 +77,19 @@ def get_all_concept_ids(db_cursor: Cursor | None = None) -> list[str]:
     return _db_get_all_concepts(db_cursor=db_cursor)
 
 
-def fasttext_model() -> fasttext._FastText:
-    """Return the FastText model that is used to compute embeddings."""
-    return _FASTTEXT_MODEL
+def get_embedding_for_text(text: str) -> np.ndarray:
+    """
+    Compute the FastText embedding of the given text.
+
+    ATTENTION: The text may not contain any newline characters.
+
+    This method should also be used when computing embeddings for concepts.
+    If this is done, it's important to use the natural form of the concept (e.g. "window sill"), as opposed to the ID form (e.g. "/c/en/window_sill").
+
+    :param text:    The text for which the embedding should be computed.
+    :return:        The embedding of the given text.
+    """
+    return _FASTTEXT_MODEL.get_sentence_vector(text=text)
 
 
 ############
