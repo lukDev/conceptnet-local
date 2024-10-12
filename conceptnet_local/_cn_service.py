@@ -77,6 +77,11 @@ def get_all_concept_ids(db_cursor: Cursor | None = None) -> list[str]:
     return _db_get_all_concepts(db_cursor=db_cursor)
 
 
+def fasttext_model() -> fasttext._FastText:
+    """Return the FastText model that is used to compute embeddings."""
+    return _FASTTEXT_MODEL
+
+
 ############
 # DB Setup #
 ############
