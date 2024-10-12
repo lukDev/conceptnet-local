@@ -52,12 +52,10 @@ def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None)
     :param db_cursor:   The DB cursor to use in the queries (optional).
     :return:            The relatedness of the given concepts, as a float in [-1, 1].
     """
-    # e1 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_1.replace("/c/en/", "").replace("_", " "))
-    # e2 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_2.replace("/c/en/", "").replace("_", " "))
+    e1 = _FASTTEXT_MODEL.get_word_vector(word=_get_concept_from_cn_id(cn_id=cn_id_1))
+    e2 = _FASTTEXT_MODEL.get_word_vector(word=_get_concept_from_cn_id(cn_id=cn_id_2))
 
-    e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
-    e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
-
+    # TODO: figure out why using the DB results in much slower A* runs
     # try:
     #     e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
     #     e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
@@ -154,3 +152,15 @@ def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
     embedding_string = result[0]
     embedding = np.fromstring(embedding_string, sep=" ")
     return embedding
+
+
+####################
+# Helper Functions #
+####################
+
+
+def _get_concept_from_cn_id(cn_id: str) -> str:
+    """Extract the concept name from the given CN ID."""
+    concept = cn_id.replace("/c/en/", "")
+    concept = concept.replace("_", " ")
+    return concept
