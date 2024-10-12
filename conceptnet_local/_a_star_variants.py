@@ -59,10 +59,10 @@ def _get_cost_similarity_difference(
 ) -> float:
     """Compute the similarity-difference cost of going from the source concept to the target concept."""
     similarity_source = get_relatedness(
-        source.id, goal.id, db_cursor=db_cursor
+        cn_id_1=source.id, cn_id_2=goal.id, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
     similarity_target = get_relatedness(
-        target.id, goal.id, db_cursor=db_cursor
+        cn_id_1=target.id, cn_id_2=goal.id, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
 
     similarity_difference = (

@@ -37,25 +37,21 @@ def get_all_edges(cn_id: str, db_cursor: Cursor | None = None) -> list[Relation]
     return _db_get_relations(cn_id=cn_id, db_cursor=db_cursor)
 
 
-def get_relatedness(*cn_ids: str, db_cursor: Cursor | None = None) -> float:
+def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None) -> float:
     """
     Compute and return the relatedness of the concepts with the given CN IDs.
 
-    :param cn_ids:      The IDs of the concepts for which the relatedness should be computed.
+    :param cn_id_1:     The ID of the first concepts for which the relatedness with the second concept should be computed.
+    :param cn_id_2:     The ID of the second concepts for which the relatedness with the first concept should be computed.
     :param db_cursor:   The DB cursor to use in the queries (optional).
     :return:            The relatedness of the given concepts, as a float in [-1, 1].
     """
-    if len(cn_ids) != 2:
-        raise ValueError(
-            f"relatedness can only be computed between 2 concepts, but {len(cn_ids)} were given"
-        )
-
     try:
-        embeddings = [_db_get_embedding(cn_id=cn_id, db_cursor=db_cursor) for cn_id in cn_ids]
+        e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
+        e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
     except ValueError:
         return -1
 
-    e1, e2 = embeddings
     cosine_similarity = np.dot(e1, e2) / (np.linalg.norm(e1) * np.linalg.norm(e2))
 
     return cosine_similarity
