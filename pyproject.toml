@@ -1,6 +1,6 @@
 [project]
 name = "conceptnet_local"
-version = "0.2.2"
+version = "0.2.3"
 authors = [
   { name="Lukas Mautner", email="lukas.mautner98@gmail.com" },
 ]
@@ -15,7 +15,8 @@ classifiers = [
 dependencies = [
     "numpy",
     "pydantic",
-    "sortedcontainers"
+    "sortedcontainers",
+    "fasttext"
 ]
 
 [project.optional-dependencies]

@@ -3,8 +3,14 @@ import sqlite3
 from functools import wraps
 from sqlite3 import Connection, Cursor
 
+import fasttext
 import numpy as np
 from pydantic import BaseModel
+
+_FASTTEXT_PATH = os.getenv("CN_FASTTEXT_PATH")
+if _FASTTEXT_PATH is None:
+    raise ValueError("FastText model path is not specified in the environment variables")
+_FASTTEXT_MODEL = fasttext.load_model(_FASTTEXT_PATH)
 
 
 class Relation(BaseModel):
@@ -46,11 +52,14 @@ def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None)
     :param db_cursor:   The DB cursor to use in the queries (optional).
     :return:            The relatedness of the given concepts, as a float in [-1, 1].
     """
-    try:
-        e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
-        e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
-    except ValueError:
-        return -1
+    e1 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_1.replace("/c/en/", "").replace("_", " "))
+    e2 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_2.replace("/c/en/", "").replace("_", " "))
+
+    # try:
+    #     e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
+    #     e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
+    # except ValueError:
+    #     return -1
 
     cosine_similarity = np.dot(e1, e2) / (np.linalg.norm(e1) * np.linalg.norm(e2))
 
