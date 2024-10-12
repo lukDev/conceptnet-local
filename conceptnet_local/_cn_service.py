@@ -52,8 +52,8 @@ def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None)
     :param db_cursor:   The DB cursor to use in the queries (optional).
     :return:            The relatedness of the given concepts, as a float in [-1, 1].
     """
-    e1 = _FASTTEXT_MODEL.get_word_vector(word=_get_concept_from_cn_id(cn_id=cn_id_1))
-    e2 = _FASTTEXT_MODEL.get_word_vector(word=_get_concept_from_cn_id(cn_id=cn_id_2))
+    e1 = _FASTTEXT_MODEL.get_sentence_vector(text=_get_concept_from_cn_id(cn_id=cn_id_1))
+    e2 = _FASTTEXT_MODEL.get_sentence_vector(text=_get_concept_from_cn_id(cn_id=cn_id_2))
 
     # TODO: figure out why using the DB results in much slower A* runs
     # try:
