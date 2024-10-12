@@ -52,8 +52,11 @@ def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None)
     :param db_cursor:   The DB cursor to use in the queries (optional).
     :return:            The relatedness of the given concepts, as a float in [-1, 1].
     """
-    e1 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_1.replace("/c/en/", "").replace("_", " "))
-    e2 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_2.replace("/c/en/", "").replace("_", " "))
+    # e1 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_1.replace("/c/en/", "").replace("_", " "))
+    # e2 = _FASTTEXT_MODEL.get_word_vector(word=cn_id_2.replace("/c/en/", "").replace("_", " "))
+
+    e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
+    e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
 
     # try:
     #     e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
