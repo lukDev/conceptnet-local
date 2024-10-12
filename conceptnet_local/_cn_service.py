@@ -67,6 +67,16 @@ def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None)
     return cosine_similarity
 
 
+def get_all_concept_ids(db_cursor: Cursor | None = None) -> list[str]:
+    """
+    Retrieve the IDs of all concepts within CN.
+
+    :param db_cursor:   The DB cursor to use in the query (optional).
+    :return:            A list containing the IDs of all concepts.
+    """
+    return _db_get_all_concepts(db_cursor=db_cursor)
+
+
 ############
 # DB Setup #
 ############
@@ -152,6 +162,17 @@ def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
     embedding_string = result[0]
     embedding = np.fromstring(embedding_string, sep=" ")
     return embedding
+
+
+@with_cn_db()
+def _db_get_all_concepts(db_cursor: Cursor) -> list[str]:
+    """Retrieve the embedding for the concept with the given ID from the DB."""
+    statement = db_cursor.execute(
+        "SELECT concept_id FROM embeddings",
+    )
+    result = statement.fetchall()
+
+    return [c[0] for c in result]
 
 
 ####################
