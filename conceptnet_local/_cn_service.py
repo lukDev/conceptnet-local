@@ -81,7 +81,7 @@ def get_embedding_for_text(text: str) -> np.ndarray:
     """
     Compute the FastText embedding of the given text.
 
-    ATTENTION: The text may not contain any newline characters.
+    ATTENTION: The text may not contain any newline characters ("\n").
 
     This method should also be used when computing embeddings for concepts.
     If this is done, it's important to use the natural form of the concept (e.g. "window sill"), as opposed to the ID form (e.g. "/c/en/window_sill").
