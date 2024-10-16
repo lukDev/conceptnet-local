@@ -57,7 +57,7 @@ class SearchRelation(BaseModel):
 
 class Path(list[SearchRelation]):
     def __hash__(self):
-        return hash(frozenset(self))
+        return hash(tuple(self))
 
 
 class ConceptDict(dict[str, Concept]):
