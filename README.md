@@ -4,6 +4,9 @@ ConceptNet and CN Numberbatch with a local DB and API.
 
 ## Version History
 
+### 0.5.0
+- custom initialization method in A*
+
 ### 0.4.0
 - FastText embeddings for arbitrary text
 

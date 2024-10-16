@@ -167,6 +167,15 @@ class AStar(ABC):
         self.db_connection = None
         self.db_cursor = None
 
+    def initialize(self):
+        """
+        Execute custom initialization logic before path computation.
+
+        Overwrite this method if you need to do any custom initialization for your custom A* implementation.
+        This method is executed at the beginning of each path computation.
+        """
+        pass
+
     @abstractmethod
     def get_cost(
         self, source: Concept, target: Concept, relation: Relation, goal: Concept
