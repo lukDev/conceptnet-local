@@ -3,14 +3,6 @@ import time
 from typing import Type
 
 from conceptnet_local._a_star import Path, AStar, Concept, SearchRelation, Relation, NoPathFoundError
-from pydantic import BaseModel
-
-
-class PathWithHash(BaseModel):
-    path: Path
-
-    def __hash__(self):
-        return hash(tuple(self.path))
 
 
 def get_offshoot_paths(
@@ -38,7 +30,7 @@ def get_offshoot_paths(
     """
     start_time = time.time()
 
-    paths: set[PathWithHash] = set()
+    paths: set[Path] = set()
 
     path_nodes_without_goal = [r.source_id for r in original_path]
     goal = original_path[-1].target_id
@@ -76,7 +68,7 @@ def get_offshoot_paths(
             continue
 
         total_path = root_path + spur_path
-        paths.add(PathWithHash(path=total_path))
+        paths.add(Path(total_path))
 
     if print_time:
         end_time = time.time()
@@ -84,4 +76,4 @@ def get_offshoot_paths(
             f"Yen-greedy completed in {(end_time - start_time):.2f}s and found {len(paths)} new paths"
         )
 
-    return [p.path for p in paths]
+    return list(paths)
