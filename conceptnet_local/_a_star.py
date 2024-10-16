@@ -106,6 +106,8 @@ class AStar(ABC):
 
         self.db_connection, self.db_cursor = setup_sqlite_db()
 
+        self.initialize()
+
         concept_dict = ConceptDict()
         priority_queue = PriorityQueue()
 
