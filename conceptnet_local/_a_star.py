@@ -55,7 +55,9 @@ class SearchRelation(BaseModel):
         return hash(self.source_id) ^ hash(self.target_id) ^ hash(self.relation)
 
 
-Path = list[SearchRelation]
+class Path(list[SearchRelation]):
+    def __hash__(self):
+        return hash(frozenset(self))
 
 
 class ConceptDict(dict[str, Concept]):
@@ -91,6 +93,8 @@ class AStar(ABC):
     db_connection: Connection | None
     db_cursor: Cursor | None
 
+    concept_dict: ConceptDict = ConceptDict()
+
     def compute_path(
         self, input_concept: str, output_concept: str, print_time: bool = False
     ) -> list[SearchRelation]:
@@ -105,15 +109,14 @@ class AStar(ABC):
         start_time = time.time()
 
         self.db_connection, self.db_cursor = setup_sqlite_db()
-
+        self.concept_dict = ConceptDict()
         self.initialize()
 
-        concept_dict = ConceptDict()
         priority_queue = PriorityQueue()
 
-        goal = concept_dict[output_concept]
+        goal = self.concept_dict[output_concept]
 
-        start = concept_dict[input_concept]
+        start = self.concept_dict[input_concept]
         start.g_score = 0
         start.f_score = self.get_heuristic(current=start, goal=goal)
 
@@ -130,13 +133,11 @@ class AStar(ABC):
                     )
 
                 self.close_db_connection()
-                return _construct_path_backwards(
-                    final_concept=current, concept_dict=concept_dict
-                )
+                return self.construct_path_backwards(concept=current)
 
             search_relations = self.get_neighbors(concept=current)
             for search_relation in search_relations:
-                neighbor = concept_dict[search_relation.target_id]
+                neighbor = self.concept_dict[search_relation.target_id]
                 cost = self.get_cost(
                     source=current,
                     target=neighbor,
@@ -236,19 +237,18 @@ class AStar(ABC):
 
         return list(all_neighbours)
 
+    def construct_path_backwards(
+        self, concept: Concept
+    ) -> Path:
+        """Construct the path to the given concept by going backwards from it."""
+        path: list[SearchRelation] = []
 
-def _construct_path_backwards(
-    final_concept: Concept, concept_dict: ConceptDict
-) -> list[SearchRelation]:
-    """Construct the path to the goal by going backwards from the final concept."""
-    path: list[SearchRelation] = []
+        current = concept
+        while current.came_from is not None:
+            path.insert(0, current.came_from)
+            current = self.concept_dict[current.came_from.source_id]
 
-    current = final_concept
-    while current.came_from is not None:
-        path.insert(0, current.came_from)
-        current = concept_dict[current.came_from.source_id]
-
-    return path
+        return Path(path)
 
 
 def format_path(path: Path) -> str:
