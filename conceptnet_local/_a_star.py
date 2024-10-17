@@ -97,7 +97,7 @@ class AStar(ABC):
 
     def compute_path(
         self, input_concept: str, output_concept: str, print_time: bool = False
-    ) -> list[SearchRelation]:
+    ) -> Path:
         """
         Compute the shortest path from the given input to the given output.
 
