@@ -135,7 +135,7 @@ class AStar(ABC):
                 self.close_db_connection()
                 return self.construct_path_backwards(concept=current)
 
-            search_relations = self.get_neighbors(concept=current)
+            search_relations = self.get_neighbors(concept=current, start=start, goal=goal)
             for search_relation in search_relations:
                 neighbor = self.concept_dict[search_relation.target_id]
                 cost = self.get_cost(
