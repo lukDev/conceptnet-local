@@ -49,9 +49,9 @@ def get_offshoot_paths(
 
         class BlockedAStar(custom_a_star):
             def get_neighbors(
-                self, concept: Concept
+                self, concept: Concept, start: Concept, goal: Concept
             ) -> list[SearchRelation]:
-                all_neighbors = super().get_neighbors(concept=concept)
+                all_neighbors = super().get_neighbors(concept=concept, start=start, goal=goal)
                 return [
                     neighbor_sr
                     for neighbor_sr in all_neighbors
