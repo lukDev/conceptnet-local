@@ -205,12 +205,14 @@ class AStar(ABC):
         """
         raise NotImplementedError
 
-    def get_neighbors(self, concept: Concept) -> list[SearchRelation]:
+    def get_neighbors(self, concept: Concept, start: Concept, goal: Concept) -> list[SearchRelation]:
         """
         Retrieve all neighbors of the given concept.
 
-        :param concept:         The concept for which all neighbors should be retrieved.
-        :return:                A list containing all neighbors of the given concept, each along with the connecting relation.
+        :param concept: The concept for which all neighbors should be retrieved.
+        :param start:   The start concept in the current path search. Can be used to filter neighbours.
+        :param goal:    The goal concept in the current path search. Can be used to filter neighbours.
+        :return:        A list containing the neighbors of the given concept, each along with the connecting relation.
         """
         edges: list[Relation] = get_all_edges(cn_id=concept.id, db_cursor=self.db_cursor)
 
