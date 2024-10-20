@@ -4,6 +4,11 @@ ConceptNet and CN Numberbatch with a local DB and API.
 
 ## Version History
 
+### 0.6.0
+- no more FasText model built in
+- embedding computation method optional in relatedness method
+- optimized embedding retrieval from DB
+
 ### 0.5.0
 - custom initialization method in A*
 

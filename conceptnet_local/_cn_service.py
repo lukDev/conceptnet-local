@@ -1,16 +1,12 @@
+import io
 import os
 import sqlite3
 from functools import wraps
 from sqlite3 import Connection, Cursor
+from typing import Callable
 
-import fasttext
 import numpy as np
 from pydantic import BaseModel
-
-_FASTTEXT_PATH = os.getenv("CN_FASTTEXT_PATH")
-if _FASTTEXT_PATH is None:
-    raise ValueError("FastText model path is not specified in the environment variables")
-_FASTTEXT_MODEL = fasttext.load_model(_FASTTEXT_PATH)
 
 
 class Relation(BaseModel):
@@ -25,6 +21,9 @@ class Relation(BaseModel):
 
     def __hash__(self):
         return hash(self.id)
+
+
+EmbeddingComputationMethod = Callable[[str], np.ndarray]
 
 
 ##################
@@ -43,24 +42,26 @@ def get_all_edges(cn_id: str, db_cursor: Cursor | None = None) -> list[Relation]
     return _db_get_relations(cn_id=cn_id, db_cursor=db_cursor)
 
 
-def get_relatedness(cn_id_1: str, cn_id_2: str, db_cursor: Cursor | None = None) -> float:
+def get_relatedness(cn_id_1: str, cn_id_2: str, compute_method: EmbeddingComputationMethod | None = None, db_cursor: Cursor | None = None) -> float:
     """
     Compute and return the relatedness of the concepts with the given CN IDs.
 
-    :param cn_id_1:     The ID of the first concepts for which the relatedness with the second concept should be computed.
-    :param cn_id_2:     The ID of the second concepts for which the relatedness with the first concept should be computed.
-    :param db_cursor:   The DB cursor to use in the queries (optional).
-    :return:            The relatedness of the given concepts, as a float in [-1, 1].
+    :param cn_id_1:         The ID of the first concepts for which the relatedness with the second concept should be computed.
+    :param cn_id_2:         The ID of the second concepts for which the relatedness with the first concept should be computed.
+    :param compute_method:  The method to use for computing the embeddings (optional).
+                            If this is not given, the DB will be used to retrieve the embeddings.
+    :param db_cursor:       The DB cursor to use in the queries (optional).
+    :return:                The relatedness of the given concepts, as a float in [-1, 1].
     """
-    e1 = get_embedding_for_text(text=_get_concept_from_cn_id(cn_id=cn_id_1))
-    e2 = get_embedding_for_text(text=_get_concept_from_cn_id(cn_id=cn_id_2))
-
-    # TODO: figure out why using the DB results in much slower A* runs
-    # try:
-    #     e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
-    #     e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
-    # except ValueError:
-    #     return -1
+    try:
+        if compute_method is not None:
+            e1 = compute_method(_get_concept_from_cn_id(cn_id=cn_id_1))
+            e2 = compute_method(_get_concept_from_cn_id(cn_id=cn_id_2))
+        else:
+            e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
+            e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
+    except Exception:
+        return -1
 
     cosine_similarity = np.dot(e1, e2) / (np.linalg.norm(e1) * np.linalg.norm(e2))
 
@@ -75,21 +76,6 @@ def get_all_concept_ids(db_cursor: Cursor | None = None) -> list[str]:
     :return:            A list containing the IDs of all concepts.
     """
     return _db_get_all_concepts(db_cursor=db_cursor)
-
-
-def get_embedding_for_text(text: str) -> np.ndarray:
-    """
-    Compute the FastText embedding of the given text.
-
-    ATTENTION: The text may not contain any newline characters ("\n").
-
-    This method should also be used when computing embeddings for concepts.
-    If this is done, it's important to use the natural form of the concept (e.g. "window sill"), as opposed to the ID form (e.g. "/c/en/window_sill").
-
-    :param text:    The text for which the embedding should be computed.
-    :return:        The embedding of the given text.
-    """
-    return _FASTTEXT_MODEL.get_sentence_vector(text=text)
 
 
 ############
@@ -107,7 +93,10 @@ def setup_sqlite_db() -> tuple[Connection, Cursor]:
     if not os.path.isfile(cn_db_path):
         raise ValueError("CN DB path does not point to a file")
 
-    db_connection = sqlite3.connect(database=cn_db_path)
+    sqlite3.register_adapter(np.ndarray, _db_adapt_array)
+    sqlite3.register_converter("ARRAY", _db_convert_array)
+
+    db_connection = sqlite3.connect(database=cn_db_path, detect_types=sqlite3.PARSE_DECLTYPES)
     db_cursor = db_connection.cursor()
 
     return db_connection, db_cursor
@@ -174,8 +163,7 @@ def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
     if result is None:
         raise ValueError(f"no concept with ID {cn_id}")
 
-    embedding_string = result[0]
-    embedding = np.fromstring(embedding_string, sep=" ")
+    embedding = result[0]
     return embedding
 
 
@@ -200,3 +188,18 @@ def _get_concept_from_cn_id(cn_id: str) -> str:
     concept = cn_id.replace("/c/en/", "")
     concept = concept.replace("_", " ")
     return concept
+
+
+def _db_adapt_array(array: np.ndarray) -> sqlite3.Binary:
+    """Convert the given numpy array to a blob for the DB."""
+    out = io.BytesIO()
+    np.save(file=out, arr=array)
+    out.seek(0)
+    return sqlite3.Binary(out.read())
+
+
+def _db_convert_array(text: bytes) -> np.ndarray:
+    """Convert the given DB blob to a numpy array."""
+    out = io.BytesIO(text)
+    out.seek(0)
+    return np.load(file=out)
