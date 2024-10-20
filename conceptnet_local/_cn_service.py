@@ -42,7 +42,12 @@ def get_all_edges(cn_id: str, db_cursor: Cursor | None = None) -> list[Relation]
     return _db_get_relations(cn_id=cn_id, db_cursor=db_cursor)
 
 
-def get_relatedness(cn_id_1: str, cn_id_2: str, compute_method: EmbeddingComputationMethod | None = None, db_cursor: Cursor | None = None) -> float:
+def get_relatedness(
+    cn_id_1: str,
+    cn_id_2: str,
+    compute_method: EmbeddingComputationMethod | None = None,
+    db_cursor: Cursor | None = None,
+) -> float:
     """
     Compute and return the relatedness of the concepts with the given CN IDs.
 
@@ -110,6 +115,7 @@ def close_sqlite_db(db_connection: Connection):
 
 def with_cn_db():
     """Return a decorator for using the CN database."""
+
     def decorator(main_function):
         @wraps(main_function)
         def wrapper(*args, **kwargs):
@@ -145,19 +151,14 @@ def _db_get_relations(cn_id: str, db_cursor: Cursor) -> list[Relation]:
     )
     result = statement.fetchall()
 
-    relations = [
-        Relation(id=r[0], start=r[1], end=r[2], rel=r[3], weight=r[4])
-        for r in result
-    ]
+    relations = [Relation(id=r[0], start=r[1], end=r[2], rel=r[3], weight=r[4]) for r in result]
     return relations
 
 
 @with_cn_db()
 def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
     """Retrieve the embedding for the concept with the given ID from the DB."""
-    statement = db_cursor.execute(
-        "SELECT embedding FROM embeddings WHERE concept_id = ?", (cn_id,)
-    )
+    statement = db_cursor.execute("SELECT embedding FROM embeddings WHERE concept_id = ?", (cn_id,))
     result = statement.fetchone()
 
     if result is None:

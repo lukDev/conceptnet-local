@@ -156,9 +156,7 @@ class AStar(ABC):
 
                 neighbor.came_from = search_relation
                 neighbor.g_score = new_g_score
-                neighbor.f_score = new_g_score + self.get_heuristic(
-                    current=neighbor, goal=goal
-                )
+                neighbor.f_score = new_g_score + self.get_heuristic(current=neighbor, goal=goal)
 
                 priority_queue.push(neighbor)
 
@@ -205,7 +203,9 @@ class AStar(ABC):
         """
         raise NotImplementedError
 
-    def get_neighbors(self, concept: Concept, start: Concept, goal: Concept) -> list[SearchRelation]:
+    def get_neighbors(
+        self, concept: Concept, start: Concept, goal: Concept
+    ) -> list[SearchRelation]:
         """
         Retrieve all neighbors of the given concept.
 
@@ -232,16 +232,12 @@ class AStar(ABC):
             )
 
             all_neighbours.add(
-                SearchRelation(
-                    source_id=concept.id, target_id=neighbor_id, relation=relation
-                )
+                SearchRelation(source_id=concept.id, target_id=neighbor_id, relation=relation)
             )
 
         return list(all_neighbours)
 
-    def construct_path_backwards(
-        self, concept: Concept
-    ) -> Path:
+    def construct_path_backwards(self, concept: Concept) -> Path:
         """Construct the path to the given concept by going backwards from it."""
         path: list[SearchRelation] = []
 
@@ -264,8 +260,6 @@ def format_path(path: Path) -> str:
 
         relation_name = sr.relation.rel.replace("/r/", "")
 
-        lines.append(
-            f"{sr.source_id} {start_arrow}——{relation_name}——{end_arrow} {sr.target_id}"
-        )
+        lines.append(f"{sr.source_id} {start_arrow}——{relation_name}——{end_arrow} {sr.target_id}")
 
     return "\n".join(lines)

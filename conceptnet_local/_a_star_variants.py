@@ -3,7 +3,7 @@ from sqlite3 import Cursor
 from typing import Callable, Type
 
 import numpy as np
-from conceptnet_local._cn_service import get_relatedness
+from conceptnet_local._cn_service import get_relatedness, EmbeddingComputationMethod
 from conceptnet_local._a_star import Concept, Relation, AStar
 from pydantic import NonNegativeFloat
 
@@ -19,6 +19,7 @@ def _get_cost_edge_count(
     relation: Relation,
     goal: Concept,
     db_cursor: Cursor | None,
+    embedding_method: EmbeddingComputationMethod | None,
 ) -> float:
     """Compute the edge-count cost of going from the source concept to the target concept (which is always 1)."""
     return 1.0
@@ -30,6 +31,7 @@ def _get_cost_edge_weight_natural(
     relation: Relation,
     goal: Concept,
     db_cursor: Cursor | None,
+    embedding_method: EmbeddingComputationMethod | None,
 ) -> float:
     """Compute the natural edge-weight cost of going from the source concept to the target concept (which is the inverse CN edge weight)."""
     return (
@@ -43,11 +45,10 @@ def _get_cost_edge_weight_inverse(
     relation: Relation,
     goal: Concept,
     db_cursor: Cursor | None,
+    embedding_method: EmbeddingComputationMethod | None,
 ) -> float:
     """Compute the inverse edge-weight cost of going from the source concept to the target concept (which is the CN edge weight)."""
-    return (
-        relation.weight
-    )  # more plausibility <=> higher cost, to find more obscure paths
+    return relation.weight  # more plausibility <=> higher cost, to find more obscure paths
 
 
 def _get_cost_similarity_difference(
@@ -56,21 +57,20 @@ def _get_cost_similarity_difference(
     relation: Relation,
     goal: Concept,
     db_cursor: Cursor | None,
+    embedding_method: EmbeddingComputationMethod | None,
 ) -> float:
     """Compute the similarity-difference cost of going from the source concept to the target concept."""
     similarity_source = get_relatedness(
-        cn_id_1=source.id, cn_id_2=goal.id, db_cursor=db_cursor
+        cn_id_1=source.id, cn_id_2=goal.id, compute_method=embedding_method, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
     similarity_target = get_relatedness(
-        cn_id_1=target.id, cn_id_2=goal.id, db_cursor=db_cursor
+        cn_id_1=target.id, cn_id_2=goal.id, compute_method=embedding_method, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
 
     similarity_difference = (
         similarity_target - similarity_source
     )  # in [-2, 2], 2 being the largest possible improvement
-    return (
-        1. - similarity_difference / 2
-    )  # in [0, 2], 0 being the largest possible improvement
+    return 1.0 - similarity_difference / 2  # in [0, 2], 0 being the largest possible improvement
 
 
 # =========================
@@ -78,10 +78,15 @@ def _get_cost_similarity_difference(
 # =========================
 
 
-def _get_heuristic_similarity(current: Concept, goal: Concept, db_cursor: Cursor | None) -> float:
+def _get_heuristic_similarity(
+    current: Concept,
+    goal: Concept,
+    db_cursor: Cursor | None,
+    embedding_method: EmbeddingComputationMethod | None,
+) -> float:
     """Compute the similarity between the given current concept and the goal."""
     cosine_similarity = get_relatedness(
-        current.id, goal.id, db_cursor=db_cursor
+        cn_id_1=current.id, cn_id_2=goal.id, compute_method=embedding_method, db_cursor=db_cursor
     )  # in [-1, 1], 1 being close
     return 1 - cosine_similarity  # in [0, 2], 0 being close
 
@@ -93,12 +98,8 @@ def _get_heuristic_similarity(current: Concept, goal: Concept, db_cursor: Cursor
 
 class CostFunction(enum.Enum):
     EDGE_COUNT = 0  # every edge has equal cost
-    EDGE_WEIGHT_NATURAL = (
-        1  # relation plausible <=> low cost, i.e. inverse of CN weights
-    )
-    EDGE_WEIGHT_INVERSE = (
-        2  # relation plausible <=> high cost, i.e. CN weights directly
-    )
+    EDGE_WEIGHT_NATURAL = 1  # relation plausible <=> low cost, i.e. inverse of CN weights
+    EDGE_WEIGHT_INVERSE = 2  # relation plausible <=> high cost, i.e. CN weights directly
     SIMILARITY_DIFFERENCE = (
         3  # increase in similarity with the goal from source to target <=> low cost
     )
@@ -160,7 +161,9 @@ def _get_weighted_values(
 
 
 def get_a_star_variant(
-    cost_weights: CostWeightMap, heuristic_weights: HeuristicWeightMap
+    cost_weights: CostWeightMap,
+    heuristic_weights: HeuristicWeightMap,
+    embedding_method: EmbeddingComputationMethod | None = None,
 ) -> Type[AStar]:
     """
     Get a variant of A* based on the given parameters.
@@ -168,6 +171,8 @@ def get_a_star_variant(
     :param cost_weights:        The weights of the different cost function to be used within the constructed A* instance.
                                 At least one of these weights must be > 0.
     :param heuristic_weights:   The weights of the different heuristic functions to be used within the constructed A* instance.
+    :param embedding_method:    The method to use for computing embeddings (optional).
+                                If this is not given, the DB will be used to retrieve any embeddings that may be needed.
     :return:                    The A* class specified by the given parameters.
     """
     if len(cost_weights) == 0:
@@ -191,6 +196,7 @@ def get_a_star_variant(
                 "relation": relation,
                 "goal": goal,
                 "db_cursor": self.db_cursor,
+                "embedding_method": embedding_method,
             }
             return _get_weighted_values(
                 weight_map=cost_weights,
@@ -199,7 +205,12 @@ def get_a_star_variant(
             )
 
         def get_heuristic(self, current: Concept, goal: Concept) -> float:
-            function_arguments = {"current": current, "goal": goal, "db_cursor": self.db_cursor}
+            function_arguments = {
+                "current": current,
+                "goal": goal,
+                "db_cursor": self.db_cursor,
+                "embedding_method": embedding_method,
+            }
             return _get_weighted_values(
                 weight_map=heuristic_weights,
                 function_map=HEURISTIC_FUNCTIONS,

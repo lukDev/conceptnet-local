@@ -2,7 +2,14 @@ import random
 import time
 from typing import Type
 
-from conceptnet_local._a_star import Path, AStar, Concept, SearchRelation, Relation, NoPathFoundError
+from conceptnet_local._a_star import (
+    Path,
+    AStar,
+    Concept,
+    SearchRelation,
+    Relation,
+    NoPathFoundError,
+)
 
 
 def get_offshoot_paths(
@@ -61,9 +68,7 @@ def get_offshoot_paths(
         blocked_a_star = BlockedAStar()
 
         try:
-            spur_path = blocked_a_star.compute_path(
-                input_concept=spur_node, output_concept=goal
-            )
+            spur_path = blocked_a_star.compute_path(input_concept=spur_node, output_concept=goal)
         except NoPathFoundError:
             continue
 
