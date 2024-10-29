@@ -10,6 +10,7 @@ from ._cn_service import (
     close_sqlite_db,
     Relation,
 )
-from ._a_star import AStar, Path, format_path, NoPathFoundError, SearchRelation, Concept
+from ._a_star import AStar, Path, NoPathFoundError, SearchRelation, Concept
 from ._a_star_variants import get_a_star_variant, CostFunction, HeuristicFunction
 from ._yen_greedy import get_offshoot_paths
+from ._utils import format_path, get_formatted_link_label

@@ -247,19 +247,3 @@ class AStar(ABC):
             current = self.concept_dict[current.came_from.source_id]
 
         return Path(path)
-
-
-def format_path(path: Path) -> str:
-    """Format the given path into a printable string."""
-    lines: list[str] = []
-
-    for sr in path:
-        following_relation_direction = sr.source_id == sr.relation.start
-        start_arrow = "<" if not following_relation_direction else ""
-        end_arrow = ">" if following_relation_direction else ""
-
-        relation_name = sr.relation.rel.replace("/r/", "")
-
-        lines.append(f"{sr.source_id} {start_arrow}——{relation_name}——{end_arrow} {sr.target_id}")
-
-    return "\n".join(lines)

@@ -186,9 +186,7 @@ def _db_get_all_concepts(db_cursor: Cursor) -> list[str]:
 
 def _get_concept_from_cn_id(cn_id: str) -> str:
     """Extract the concept name from the given CN ID."""
-    concept = cn_id.replace("/c/en/", "")
-    concept = concept.replace("_", " ")
-    return concept
+    return cn_id.replace("/c/en/", "").replace("_", " ")
 
 
 def _db_adapt_array(array: np.ndarray) -> sqlite3.Binary:

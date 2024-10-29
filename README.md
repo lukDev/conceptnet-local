@@ -4,8 +4,13 @@ ConceptNet and CN Numberbatch with a local DB and API.
 
 ## Version History
 
+### 0.7.0
+- separate utils file
+- link label formatting
+- natural-language path formatting
+
 ### 0.6.0
-- no more FasText model built in
+- no more FastText model built in
 - embedding computation method optional in relatedness method
 - optimized embedding retrieval from DB
 
