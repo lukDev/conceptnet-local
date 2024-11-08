@@ -61,10 +61,19 @@ def _format_search_relation_natural(sr: SearchRelation) -> str:
 
 def _format_search_relation_technical(sr: SearchRelation) -> str:
     """Format the given search relation in a technical way."""
-    following_relation_direction = sr.source_id == sr.relation.start
-    start_arrow = "<" if not following_relation_direction else ""
-    end_arrow = ">" if following_relation_direction else ""
+    start_arrow: str
+    end_arrow: str
+    relation_name: str
 
-    relation_name = sr.relation.rel.replace("/r/", "")
+    if sr.relation is None:
+        start_arrow = ""
+        end_arrow = ">"
+        relation_name = ""
+    else:
+        following_relation_direction = sr.source_id == sr.relation.start
+        start_arrow = "<" if not following_relation_direction else ""
+        end_arrow = ">" if following_relation_direction else ""
+
+        relation_name = sr.relation.rel.replace("/r/", "")
 
     return f"{sr.source_id} {start_arrow}——{relation_name}——{end_arrow} {sr.target_id}"
