@@ -41,7 +41,7 @@ class Concept(BaseModel):
 class SearchRelation(BaseModel):
     source_id: str
     target_id: str
-    relation: Relation
+    relation: Relation | None
     cost: float | None = None
 
     def __eq__(self, other: "SearchRelation"):
