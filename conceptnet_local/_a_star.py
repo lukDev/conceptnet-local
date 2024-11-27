@@ -11,7 +11,6 @@ from pydantic import BaseModel
 from sortedcontainers import SortedList
 
 from conceptnet_local._cn_service import setup_sqlite_db, close_sqlite_db, get_all_edges, Relation
-from conceptnet_local._utils import format_path
 
 
 class NoPathFoundError(Exception):
@@ -61,6 +60,7 @@ class Path(list[SearchRelation]):
         return hash(tuple(self))
 
     def __str__(self):
+        from conceptnet_local._utils import format_path
         formatted = format_path(path=self, natural_language=False)
         return ", ".join(formatted.split("\n"))
 

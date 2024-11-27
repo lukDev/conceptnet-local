@@ -1,6 +1,6 @@
 [project]
 name = "conceptnet_local"
-version = "0.7.3"
+version = "0.7.4"
 authors = [
   { name="Lukas Mautner", email="lukas.mautner98@gmail.com" },
 ]
