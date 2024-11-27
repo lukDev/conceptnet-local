@@ -64,6 +64,9 @@ class Path(list[SearchRelation]):
         formatted = format_path(path=self, natural_language=False)
         return ", ".join(formatted.split("\n"))
 
+    def __repr__(self):
+        return self.__str__()
+
 
 class ConceptDict(dict[str, Concept]):
     def __missing__(self, key: str) -> Concept:
