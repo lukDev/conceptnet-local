@@ -93,7 +93,6 @@ def get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor | 
     :return:            A list containing the IDs of the similar concepts.
     """
     search_term = search_term.replace(" ", "_")
-    search_term = f"%{search_term}%"
 
     results = _db_get_similar_concepts(search_term=search_term, n_concepts=n_concepts, db_cursor=db_cursor)
     return results
@@ -195,12 +194,21 @@ def _db_get_all_concepts(db_cursor: Cursor) -> list[str]:
     return [c[0] for c in result]
 
 
+_SIMILARITY_SCRIPT = """
+SELECT concept_id FROM embeddings WHERE concept_id LIKE ?
+ORDER BY 
+    CASE WHEN concept_id = ? THEN 0 ELSE 1 END,
+    INSTR(concept_id, ?),
+    LENGTH(concept_id),
+    concept_id
+LIMIT ?;
+"""
+
+
 @with_cn_db()
 def _db_get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor) -> list[str]:
     """Retrieve the IDs of similar concepts to the given search terms."""
-    statement = db_cursor.execute(
-        "SELECT concept_id FROM embeddings WHERE concept_id LIKE ? LIMIT ?", (search_term, n_concepts),
-    )
+    statement = db_cursor.execute(_SIMILARITY_SCRIPT, (f"%{search_term}%", f"/c/en/{search_term}", search_term))
     result = statement.fetchall()
 
     return [c[0] for c in result]
