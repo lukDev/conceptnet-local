@@ -1,5 +1,5 @@
 .idea
-db_setup/data
+conceptnet_local/db_setup/data
 .env
 
 # Byte-compiled / optimized / DLL files
