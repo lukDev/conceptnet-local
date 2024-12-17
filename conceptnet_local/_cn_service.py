@@ -83,6 +83,22 @@ def get_all_concept_ids(db_cursor: Cursor | None = None) -> list[str]:
     return _db_get_all_concepts(db_cursor=db_cursor)
 
 
+def get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor | None = None) -> list[str]:
+    """
+    Retrieve those concepts from the DB that are similar to the given search term.
+
+    :param search_term: The search term for which similar concepts should be retrieved.
+    :param n_concepts:  The number of similar concepts that should be retrieved.
+    :param db_cursor:   The DB cursor to use in the query (optional).
+    :return:            A list containing the IDs of the similar concepts.
+    """
+    search_term = search_term.replace(" ", "_")
+    search_term = f"%{search_term}%"
+
+    results = _db_get_similar_concepts(search_term=search_term, n_concepts=n_concepts, db_cursor=db_cursor)
+    return results
+
+
 ############
 # DB Setup #
 ############
@@ -170,9 +186,20 @@ def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
 
 @with_cn_db()
 def _db_get_all_concepts(db_cursor: Cursor) -> list[str]:
-    """Retrieve the embedding for the concept with the given ID from the DB."""
+    """Retrieve the IDs of all concepts in the DB."""
     statement = db_cursor.execute(
         "SELECT concept_id FROM embeddings",
+    )
+    result = statement.fetchall()
+
+    return [c[0] for c in result]
+
+
+@with_cn_db()
+def _db_get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor) -> list[str]:
+    """Retrieve the IDs of similar concepts to the given search terms."""
+    statement = db_cursor.execute(
+        "SELECT concept_id FROM embeddings WHERE concept_id LIKE ? LIMIT ?", (search_term, n_concepts),
     )
     result = statement.fetchall()
 

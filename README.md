@@ -4,6 +4,9 @@ ConceptNet and CN Numberbatch with a local DB and API.
 
 ## Version History
 
+### 0.8.0
+- retrieval of similar concepts
+
 ### 0.7.0
 - separate utils file
 - link label formatting
