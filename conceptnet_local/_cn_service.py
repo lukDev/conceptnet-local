@@ -208,7 +208,7 @@ LIMIT ?;
 @with_cn_db()
 def _db_get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor) -> list[str]:
     """Retrieve the IDs of similar concepts to the given search terms."""
-    statement = db_cursor.execute(_SIMILARITY_SCRIPT, (f"%{search_term}%", f"/c/en/{search_term}", search_term))
+    statement = db_cursor.execute(_SIMILARITY_SCRIPT, (f"%{search_term}%", f"/c/en/{search_term}", search_term, n_concepts))
     result = statement.fetchall()
 
     return [c[0] for c in result]
