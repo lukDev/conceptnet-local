@@ -187,7 +187,7 @@ def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
 def _db_get_all_concepts(db_cursor: Cursor) -> list[str]:
     """Retrieve the IDs of all concepts in the DB."""
     statement = db_cursor.execute(
-        "SELECT concept_id FROM embeddings",
+        "SELECT id FROM concepts",
     )
     result = statement.fetchall()
 
@@ -195,12 +195,8 @@ def _db_get_all_concepts(db_cursor: Cursor) -> list[str]:
 
 
 _SIMILARITY_SCRIPT = """
-SELECT concept_id FROM embeddings WHERE concept_id LIKE ?
-ORDER BY 
-    CASE WHEN concept_id = ? THEN 0 ELSE 1 END,
-    INSTR(concept_id, ?),
-    LENGTH(concept_id),
-    concept_id
+SELECT id FROM concepts WHERE id LIKE ?
+ORDER BY degree DESC
 LIMIT ?;
 """
 
@@ -208,7 +204,7 @@ LIMIT ?;
 @with_cn_db()
 def _db_get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor) -> list[str]:
     """Retrieve the IDs of similar concepts to the given search terms."""
-    statement = db_cursor.execute(_SIMILARITY_SCRIPT, (f"%{search_term}%", f"/c/en/{search_term}", search_term, n_concepts))
+    statement = db_cursor.execute(_SIMILARITY_SCRIPT, (f"%{search_term}%", n_concepts))
     result = statement.fetchall()
 
     return [c[0] for c in result]

@@ -2,9 +2,12 @@
 
 ConceptNet and CN Numberbatch with a local DB and API.
 
+The DB can be set up by navigating to the ```db_setup``` directory and following the instructions in the notebook there.
+
 ## Version History
 
 ### 0.8
+- concepts table
 - retrieval of similar concepts
 
 ### 0.7
