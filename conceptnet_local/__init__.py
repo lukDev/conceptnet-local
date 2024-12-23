@@ -6,6 +6,7 @@ from ._cn_service import (
     get_all_edges,
     get_relatedness,
     get_all_concept_ids,
+    does_concept_exist,
     get_similar_concepts,
     setup_sqlite_db,
     close_sqlite_db,
