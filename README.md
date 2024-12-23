@@ -9,6 +9,7 @@ The DB can be set up by navigating to the ```db_setup``` directory and following
 ### 0.8
 - concepts table
 - retrieval of similar concepts
+- concept existence check
 
 ### 0.7
 - separate utils file

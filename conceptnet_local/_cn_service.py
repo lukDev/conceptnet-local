@@ -83,6 +83,18 @@ def get_all_concept_ids(db_cursor: Cursor | None = None) -> list[str]:
     return _db_get_all_concepts(db_cursor=db_cursor)
 
 
+def does_concept_exist(concept_id: str, db_cursor: Cursor | None = None) -> bool:
+    """
+    Check whether a concept with the given ID exists within CN.
+
+    :param concept_id:  The ID of the concept whose existence should be checked.
+    :param db_cursor:   The DB cursor to use in the query (optional).
+    :return:            A flag indicating whether the given concept exists.
+    """
+    concept: tuple | None = _db_get_concept_by_id(concept_id=concept_id, db_cursor=db_cursor)
+    return concept is not None
+
+
 def get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor | None = None) -> list[str]:
     """
     Retrieve those concepts from the DB that are similar to the given search term.
@@ -186,12 +198,19 @@ def _db_get_embedding(cn_id: str, db_cursor: Cursor) -> np.ndarray:
 @with_cn_db()
 def _db_get_all_concepts(db_cursor: Cursor) -> list[str]:
     """Retrieve the IDs of all concepts in the DB."""
-    statement = db_cursor.execute(
-        "SELECT id FROM concepts",
-    )
+    statement = db_cursor.execute("SELECT id FROM concepts")
     result = statement.fetchall()
 
     return [c[0] for c in result]
+
+
+@with_cn_db()
+def _db_get_concept_by_id(concept_id: str, db_cursor: Cursor) -> tuple | None:
+    """Retrieve the IDs of all concepts in the DB."""
+    statement = db_cursor.execute("SELECT * FROM concepts WHERE id = ?", (concept_id,))
+    result = statement.fetchone()
+
+    return result
 
 
 _SIMILARITY_SCRIPT = """
