@@ -4,7 +4,7 @@ version = "0.8.8"
 authors = [
   { name="Lukas Mautner", email="lukas.mautner98@gmail.com" },
 ]
-description = "ConceptNet and CN Numberbatch with a local DB and API."
+description = "ConceptNet and embeddings with a local DB and API."
 readme = "README.md"
 requires-python = ">=3.12"
 classifiers = [
