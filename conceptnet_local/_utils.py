@@ -39,6 +39,19 @@ def format_path(path: Path, natural_language: bool = False) -> str:
     return "\n".join(lines)
 
 
+def get_concepts_from_path(path: Path) -> list[str]:
+    """
+    Retrieve the concepts from the given path and return them in order.
+
+    :param path:    The path whose concepts should be retrieved.
+    :return:        A list containing the IDs of the concepts on the given path, in order.
+    """
+    if len(path) == 0:
+        return []
+
+    return [sr.source_id for sr in path] + [path[-1].target_id]
+
+
 ####################
 # Helper Functions #
 ####################
