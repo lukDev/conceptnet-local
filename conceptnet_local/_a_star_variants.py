@@ -151,7 +151,11 @@ def _get_weighted_values(
 
     weights: np.ndarray = np.array([w for w in weight_map.values()])
     values: list[float] = []
-    for function_type in weight_map.keys():
+    for i, function_type in enumerate(weight_map.keys()):
+        if weights[i] == 0:
+            values.append(0.)
+            continue
+
         function = function_map[function_type]
         values.append(function(**arguments))
     values: np.ndarray = np.array(values)
