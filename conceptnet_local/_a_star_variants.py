@@ -97,11 +97,11 @@ def _get_heuristic_similarity(
 
 
 class CostFunction(enum.Enum):
-    EDGE_COUNT = 0  # every edge has equal cost
-    EDGE_WEIGHT_NATURAL = 1  # relation plausible <=> low cost, i.e. inverse of CN weights
-    EDGE_WEIGHT_INVERSE = 2  # relation plausible <=> high cost, i.e. CN weights directly
+    EDGE_COUNT = "edge_count"  # every edge has equal cost
+    EDGE_WEIGHT_NATURAL = "edge_weight_natural"  # relation plausible <=> low cost, i.e. inverse of CN weights
+    EDGE_WEIGHT_INVERSE = "edge_weight_inverse"  # relation plausible <=> high cost, i.e. CN weights directly
     SIMILARITY_DIFFERENCE = (
-        3  # increase in similarity with the goal from source to target <=> low cost
+        "similarity_difference"  # increase in similarity with the goal from source to target <=> low cost
     )
 
 
@@ -117,7 +117,7 @@ COST_FUNCTIONS: CostFunctionMap = {
 
 
 class HeuristicFunction(enum.Enum):
-    SIMILARITY_TO_GOAL = 0  # high similarity to goal <=> low heuristic value
+    SIMILARITY_TO_GOAL = "similarity_to_goal"  # high similarity to goal <=> low heuristic value
 
 
 HeuristicWeightMap = dict[HeuristicFunction, NonNegativeFloat]
