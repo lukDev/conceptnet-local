@@ -1,12 +1,16 @@
 import re
 
+from nltk.corpus import stopwords
+
 from conceptnet_local._a_star import Path, SearchRelation
+
+_CN_LANGUAGE_PREFIX = "/c/en/"
+_STOPWORDS = stopwords.words("english")
 
 
 ##################
 # Public Methods #
 ##################
-
 
 def get_formatted_link_label(label: str) -> str:
     """
@@ -52,20 +56,65 @@ def get_concepts_from_path(path: Path) -> list[str]:
     return [sr.source_id for sr in path] + [path[-1].target_id]
 
 
+def get_natural_concept_from_id(concept_id: str) -> str:
+    """
+    Convert the given concept ID to its natural form.
+
+    :param concept_id:  The concept ID to convert to its natural form.
+    :return:            The natural form of the given concept ID.
+    """
+    return concept_id.replace(_CN_LANGUAGE_PREFIX, "").replace("_", " ")
+
+
+def get_id_from_natural_concept(concept: str) -> str:
+    """
+    Convert the given natural concept to its ID.
+
+    :param concept: The natural concept to convert to its ID.
+    :return:        The ID of the given natural concept.
+    """
+    return f"{_CN_LANGUAGE_PREFIX}{concept.lower().replace(' ', '_')}"
+
+
+def sanitize_term(term: str) -> str:
+    """
+    Sanitize the given term for conversion to a concept ID.
+
+    :param term:    The term to be sanitized.
+    :return:        The sanitized term.
+    """
+    term = term.lower()
+
+    multiple_whitespace_regex = re.compile(" {2,}")
+    term = multiple_whitespace_regex.sub(" ", term)
+
+    return term
+
+
+######################
+# Internal Functions #
+######################
+
+
+def is_word_stopword(word: str) -> bool:
+    """
+    Check whether the given word is a stopword.
+
+    :param word:    The word to be checked.
+    :return:        A flag indicating whether the given word is a stopword.
+    """
+    return word in _STOPWORDS
+
+
 ####################
 # Helper Functions #
 ####################
 
 
-def _get_concept_from_cn_id(cn_id: str) -> str:
-    """Extract the concept name from the given CN ID."""
-    return cn_id.replace("/c/en/", "").replace("_", " ")
-
-
 def _format_search_relation_natural(sr: SearchRelation) -> str:
     """Format the given search relation in a natural way."""
-    start_concept = _get_concept_from_cn_id(cn_id=sr.relation.start)
-    end_concept = _get_concept_from_cn_id(cn_id=sr.relation.end)
+    start_concept = get_natural_concept_from_id(concept_id=sr.relation.start)
+    end_concept = get_natural_concept_from_id(concept_id=sr.relation.end)
 
     relation_name = get_formatted_link_label(label=sr.relation.rel)
 
