@@ -66,7 +66,7 @@ def get_relatedness(
             e1 = _db_get_embedding(cn_id=cn_id_1, db_cursor=db_cursor)
             e2 = _db_get_embedding(cn_id=cn_id_2, db_cursor=db_cursor)
     except Exception:
-        return -1
+        return 0
 
     cosine_similarity = np.dot(e1, e2) / (np.linalg.norm(e1) * np.linalg.norm(e2))
 
@@ -108,6 +108,21 @@ def get_similar_concepts(search_term: str, n_concepts: int, db_cursor: Cursor | 
 
     results = _db_get_similar_concepts(search_term=search_term, n_concepts=n_concepts, db_cursor=db_cursor)
     return results
+
+
+def get_degree(concept_id: str, db_cursor: Cursor | None = None) -> int:
+    """
+    Retrieve the degree of the concept with the given ID.
+
+    :param concept_id:  The ID of the concept whose degree should be retrieved.
+    :param db_cursor:   The DB cursor to use in the query (optional).
+    :return:            The degree of the given concept, if it exists. Otherwise, 0.
+    """
+    concept: tuple | None = _db_get_concept_by_id(concept_id=concept_id, db_cursor=db_cursor)
+    if concept is None:
+        return 0
+
+    return concept[1]
 
 
 ############

@@ -8,6 +8,7 @@ from ._cn_service import (
     get_all_concept_ids,
     does_concept_exist,
     get_similar_concepts,
+    get_degree,
     setup_sqlite_db,
     close_sqlite_db,
     Relation,

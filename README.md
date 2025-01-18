@@ -6,6 +6,9 @@ The DB can be set up by navigating to the ```db_setup``` directory and following
 
 ## Version History
 
+### 0.9
+- concept degree retrieval
+
 ### 0.8
 - concepts table
 - retrieval of similar concepts
