@@ -1,6 +1,7 @@
 # Local ConceptNet
 
-ConceptNet and CN Numberbatch with a local DB and API.
+ConceptNet and embeddings with a local DB and API.
+English only.
 
 The DB can be set up by navigating to the ```db_setup``` directory and following the instructions in the notebook there.
 
