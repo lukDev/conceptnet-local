@@ -3,6 +3,18 @@
 ConceptNet and fastText embeddings with a local DB and API.
 English only.
 
+## Setup
+
+Make sure the path to the DB is included in your environment variables:
+```shell
+CN_DB_PATH=<path>/cn.db
+```
+
+The DB file can be downloaded from here (~2.2GB):
+https://drive.google.com/file/d/1ykKOa8oUzdiI5OShaQgyP8AZBH2iHDot/view?usp=sharing
+
+Alternatively, the DB can be set up manually by navigating to the ```db_setup``` directory in this repository and following the instructions in the notebook there.
+
 ## Example Usage
 
 Import:
@@ -81,10 +93,6 @@ Close DB connection:
 ```python
 cnl.close_sqlite_db(db_connection=connection)
 ```
-
-## Database
-
-The DB can be set up by navigating to the ```db_setup``` directory and following the instructions in the notebook there.
 
 ## Version History
 
