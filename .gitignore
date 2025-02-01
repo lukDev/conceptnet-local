@@ -1,6 +1,7 @@
 .idea
 conceptnet_local/db_setup/data
 .env
+release.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
