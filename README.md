@@ -88,6 +88,9 @@ The DB can be set up by navigating to the ```db_setup``` directory and following
 
 ## Version History
 
+### 1.0
+- release 🎉
+
 ### 0.9
 - concept extraction from text
 - concept degree retrieval

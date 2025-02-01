@@ -1,6 +1,6 @@
 [project]
 name = "conceptnet_local"
-version = "0.9.3"
+version = "1.0.0"
 authors = [
   { name="Lukas Mautner", email="lukas.mautner98@gmail.com" },
 ]
@@ -32,6 +32,9 @@ Homepage = "https://github.com/lukDev/conceptnet-local"
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+license-files = ["LICENSE"]
 
 [tool.black]
 line-length = 100
