@@ -75,6 +75,13 @@ path = custom_a_star.compute_path(input_concept="/c/en/example", output_concept=
 print(cnl.format_path(path=path))
 ```
 
+### Concept Extraction
+
+Extract the ConceptNet concepts from a given text, along with their locations in the text:
+```python
+concepts_in_text = cnl.get_concepts_in_text(text="This is an example.")
+```
+
 ### Custom Queries
 
 Get a reference to the DB:
