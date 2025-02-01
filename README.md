@@ -3,7 +3,7 @@
 ConceptNet and fastText embeddings with a local DB and API.
 English only.
 
-## Usage
+## Example Usage
 
 Import:
 ```python
