@@ -10,7 +10,7 @@ Make sure the path to the DB is included in your environment variables:
 CN_DB_PATH=<path>/cn.db
 ```
 
-The DB file can be downloaded from here (~2.2GB):
+The DB file can be downloaded from here (~2.4GB):
 https://drive.google.com/file/d/1ykKOa8oUzdiI5OShaQgyP8AZBH2iHDot/view?usp=sharing
 
 Alternatively, the DB can be set up manually by navigating to the ```db_setup``` directory in this repository and following the instructions in the notebook there.
